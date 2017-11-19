@@ -1,13 +1,13 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Task, Comment
+from .models import Task, Comment, Notification
 
 
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'created_tasks', 'assigned_tasks')
+        fields = ('id', 'username', 'created_tasks', 'assigned_tasks', 'notification')
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -32,5 +32,11 @@ class TaskSerializer(serializers.ModelSerializer):
             setattr(instance, 'is_finished', validated_data.get('is_finished', None))
             instance.save()
             return instance
-
         return super(TaskSerializer, self).update(instance, validated_data)
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Notification
+        fields = ('target', 'text', 'date', 'link', 'seen')
