@@ -3,11 +3,11 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.sites.models import Site
-from django.urls import reverse
+from django.core.signals import request_finished
 import django.dispatch
+import datetime
 
 # Create your models here.
-
 
 PROGRESS_CHOICES = (
     ('ASSIGNED', 'assigned'),
@@ -88,6 +88,24 @@ class Comment(models.Model):
     def send_notification(self, instance):
         task_created.send(sender=self.__class__, creator=instance.creator.pk,
                           date=instance.date, pk=instance.pk)
+
+
+class Team(models.Model):
+
+    name = models.CharField(
+        max_length=200,
+        null=False,
+        blank=False
+    )
+
+    description = models.TextField()
+
+    members = models.ManyToManyField(
+        User
+    )
+
+
+
 
 
 class Notification(models.Model):
@@ -180,5 +198,44 @@ def comment_created(sender, instance, **kwargs):
                                 link=url, seen=False)
 
 
+def team_changed(instance, old_members, **kwargs):
+    date = datetime.datetime.now()
+    link = ""
+
+    added_members = []
+    removed_members = []
+
+    members = instance.members.all()
+    team_name = instance.name
+    text_added = " has been added to your team <b>" + team_name + "</b>"
+    text_removed = " has been removed from your team <b>" + team_name + "</b>"
+    self_added = "You have been added do the team <b>" + team_name + "</b>"
+    self_removed = "You have been removed from your team <b>" + team_name + "</b>"
+
+    for member in old_members:
+        if member not in members:
+            removed_members.append(member.username)
+            Notification.objects.create(target=member, text=self_removed,
+                                        date=date, link=link, seen=False)
+
+    for member in members:
+        if member not in old_members:
+            added_members.append(member.username)
+
+    for member in members:
+        for removed in removed_members:
+            text = "<b>" + removed + "</b>" + text_removed
+            Notification.objects.create(target=member, text=text, date=date,
+                                        link=link, seen=False)
+        for added in added_members:
+            text = ""
+
+            if member.username != added:
+                text = "<b>" + added + "</b>" + text_added
+            else:
+                text = self_added
+
+            Notification.objects.create(target=member, text=text, date=date,
+                                        link=link, seen=False)
 
 

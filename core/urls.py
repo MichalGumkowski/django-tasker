@@ -7,6 +7,7 @@ router.register(r'tasks', views.TaskViewSet)
 router.register(r'comments', views.CommentViewSet)
 router.register(r'users', views.UserViewSet)
 router.register(r'notifications', views.NotificationViewSet)
+router.register(r'teams', views.TeamViewSet)
 
 
 urlpatterns = [

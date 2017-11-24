@@ -1,9 +1,8 @@
-from .models import Task, Comment, Notification
+from .models import Task, Comment, Notification, Team
 from django.contrib.auth.models import User
-from .serializer import UserSerializer, TaskSerializer, CommentSerializer, NotificationSerializer
+from .serializer import UserSerializer, TaskSerializer, CommentSerializer, NotificationSerializer, TeamSerializer
 from rest_framework import viewsets, permissions
 from .permissions import IsCreatorOrReadOnly, IsTargetOrReadOnly
-
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -24,6 +23,12 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permissions = (permissions.IsAuthenticated, )
+
+
+class TeamViewSet(viewsets.ModelViewSet):
+    queryset = Team.objects.all()
+    serializer_class = TeamSerializer
+    permission = (permissions.IsAuthenticated, )
 
 
 class NotificationViewSet(viewsets.ReadOnlyModelViewSet):

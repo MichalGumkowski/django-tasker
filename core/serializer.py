@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Task, Comment, Notification
+from .models import Task, Comment, Notification, Team, team_changed
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -35,8 +36,27 @@ class TaskSerializer(serializers.ModelSerializer):
         return super(TaskSerializer, self).update(instance, validated_data)
 
 
+class TeamSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Team
+        fields = ('name', 'description', 'members')
+
+    def update(self, instance, validated_data):
+        old_members = []
+        for member in instance.members.all():
+            old_members.append(member)
+
+        update = super(TeamSerializer, self).update(instance, validated_data)
+
+        team_changed(instance, old_members)
+
+        return update
+
+
 class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
         fields = ('target', 'text', 'date', 'link', 'seen')
+
