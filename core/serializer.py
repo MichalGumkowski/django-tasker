@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from .models import Task, Comment, Notification, Team, team_changed
 
 
-
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -42,6 +41,7 @@ class TeamSerializer(serializers.ModelSerializer):
         model = Team
         fields = ('name', 'description', 'members')
 
+    #send notification with previous and actual users in the group
     def update(self, instance, validated_data):
         old_members = []
         for member in instance.members.all():

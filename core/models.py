@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.sites.models import Site
-from django.core.signals import request_finished
 import django.dispatch
 import datetime
 
@@ -53,6 +52,7 @@ class Task(models.Model):
     def get_absolute_url(self):
         return "/tasks/%i/" % self.pk
 
+    #send notification, when task has been added/updated
     def send_notification(self, instance):
         task_created.send(sender=self.__class__, creator=instance.creator.pk,
                           target=instance.target, title=instance.title,
@@ -85,6 +85,7 @@ class Comment(models.Model):
         return self.creator.username + '\'s comment to ' + \
                     self.task.title + ' task'
 
+    #send notification when comment has been added
     def send_notification(self, instance):
         task_created.send(sender=self.__class__, creator=instance.creator.pk,
                           date=instance.date, pk=instance.pk)
@@ -103,9 +104,6 @@ class Team(models.Model):
     members = models.ManyToManyField(
         User
     )
-
-
-
 
 
 class Notification(models.Model):
@@ -135,7 +133,7 @@ class Notification(models.Model):
         default=False
     )
 
-
+#create proper notification, when task has been added/modified
 @receiver(post_save, sender=Task)
 def task_created(sender, instance, created, **kwargs):
 
@@ -146,6 +144,7 @@ def task_created(sender, instance, created, **kwargs):
     path = obj.get_absolute_url()
     url = 'http://{domain}{path}'.format(domain=domain, path=path)
 
+    #if task has been created inform the target
     if created:
         target = instance.target
 
@@ -154,6 +153,8 @@ def task_created(sender, instance, created, **kwargs):
 
         Notification.objects.create(target=target, text=text, date=date,
                                     link=url, seen=False)
+    #if bool has been finished (task was completed) was checked
+    #send that information to the task creator
     elif instance.is_finished:
         target = instance.creator
 
@@ -162,6 +163,7 @@ def task_created(sender, instance, created, **kwargs):
 
         Notification.objects.create(target=target, text=text, date=date,
                                     link=url, seen=False)
+    #if task was updated in any other way inform both creator and target
     else:
         target_1 = instance.creator
         target_2 = instance.target
@@ -174,7 +176,7 @@ def task_created(sender, instance, created, **kwargs):
                                     link=url, seen=False)
 
 
-
+#if comment has been added to the task, inform the other party
 @receiver(post_save, sender=Comment)
 def comment_created(sender, instance, **kwargs):
 
@@ -197,7 +199,8 @@ def comment_created(sender, instance, **kwargs):
     Notification.objects.create(target=target, text=text, date=date,
                                 link=url, seen=False)
 
-
+#if someone has been added/removed from the team, inform all the parties from the team
+#all the data is taken from the serializer!
 def team_changed(instance, old_members, **kwargs):
     date = datetime.datetime.now()
     link = ""
