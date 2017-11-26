@@ -105,8 +105,9 @@ class Mail(models.Model):
     sent = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        send_mail(self.title, self.text,
-                  'testingdjango111@gmail.com', ['tored11@gmail.com'])
+        if self.target.email:
+            send_mail(self.title, self.text,
+                      'testingdjango111@gmail.com', [self.target.email])
 
         super(Mail, self).save(*args, **kwargs)
 
