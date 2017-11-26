@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.contrib.sites.models import Site
+from django.core.mail import send_mail
 import django.dispatch
 import datetime
 
@@ -87,8 +88,27 @@ class Comment(models.Model):
 
     #send notification when comment has been added
     def send_notification(self, instance):
-        task_created.send(sender=self.__class__, creator=instance.creator.pk,
-                          date=instance.date, pk=instance.pk)
+        comment_created.send(sender=self.__class__, creator=instance.creator,
+                             date=instance.date, pk=instance.pk)
+
+
+class Mail(models.Model):
+    target = models.ForeignKey(User)
+
+    title = models.CharField(
+        max_length=250,
+        default="Tasker: ",
+    )
+
+    text = models.TextField()
+
+    sent = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        send_mail(self.title, self.text,
+                  'testingdjango111@gmail.com', ['tored11@gmail.com'])
+
+        super(Mail, self).save(*args, **kwargs)
 
 
 class Team(models.Model):
@@ -132,6 +152,17 @@ class Notification(models.Model):
     seen = models.BooleanField(
         default=False
     )
+
+    def save(self, *args, **kwargs):
+        mail_target = self.target
+        mail_title = "Tasker: " + self.text
+        mail_text = "Hi! </br><b>" + self.text + "</br></b>" + \
+                    "You can check it out by clicking the link shown below.</br>" + \
+                    self.link
+        Mail.objects.create(target=mail_target, title=mail_title,
+                            text=mail_text, sent=False)
+        super(Notification, self).save(*args, **kwargs)
+
 
 #create proper notification, when task has been added/modified
 @receiver(post_save, sender=Task)
@@ -199,6 +230,7 @@ def comment_created(sender, instance, **kwargs):
     Notification.objects.create(target=target, text=text, date=date,
                                 link=url, seen=False)
 
+
 #if someone has been added/removed from the team, inform all the parties from the team
 #all the data is taken from the serializer!
 def team_changed(instance, old_members, **kwargs):
@@ -240,5 +272,6 @@ def team_changed(instance, old_members, **kwargs):
 
             Notification.objects.create(target=member, text=text, date=date,
                                         link=link, seen=False)
+
 
 

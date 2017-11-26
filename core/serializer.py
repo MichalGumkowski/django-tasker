@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Task, Comment, Notification, Team, team_changed
+from .models import Task, Comment, Notification, Mail, Team, team_changed
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -54,9 +54,15 @@ class TeamSerializer(serializers.ModelSerializer):
         return update
 
 
+class MailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Mail
+        fields = ('target', 'title', 'text', 'sent')
+
+
 class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
         fields = ('target', 'text', 'date', 'link', 'seen')
-

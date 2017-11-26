@@ -123,5 +123,18 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-
 SITE_ID = 1
+
+#mailing
+
+EMAIL_USE_TLS = True
+
+EMAIL_HOST = 'smtp.gmail.com'
+
+EMAIL_PORT = 587
+
+EMAIL_HOST_USER = 'testingdjango111'
+
+EMAIL_HOST_PASSWORD = ''
+
+
