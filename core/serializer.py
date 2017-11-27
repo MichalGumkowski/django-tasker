@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Task, Comment, Notification, Mail, Team, team_changed
+from django.contrib.sites.models import Site
+import datetime
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -40,6 +42,23 @@ class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
         fields = ('name', 'description', 'members')
+
+    def create(self, validated_data):
+        name = validated_data.get('name')
+
+        users = validated_data.get('members')
+        not_text = "You have been added do the team <b>" + name + "</b>"
+
+        domain = Site.objects.get_current().domain
+        path = "/teams/" + str(Team.objects.count()+1) + "/"
+        url = 'http://{domain}{path}'.format(domain=domain, path=path)
+        date = datetime.datetime.now()
+
+        for user in users:
+            Notification.objects.create(target=user, text=not_text,
+                                        date=date, link=url, seen=False)
+
+        return super(TeamSerializer, self).create(validated_data)
 
     #send notification with previous and actual users in the group
     def update(self, instance, validated_data):

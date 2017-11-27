@@ -18,6 +18,7 @@ import datetime
 @receiver(post_save, sender=Task)
 def task_created(sender, instance, created, **kwargs):
 
+    text = ""
     date = instance.created
     # url
     domain = Site.objects.get_current().domain
@@ -27,23 +28,33 @@ def task_created(sender, instance, created, **kwargs):
 
     #if task has been created inform the target
     if created:
+        #Notification
         target = instance.target
 
         text = instance.creator.username + " added a new task for you: <b>" + \
-               instance.title + "<\\b>"
+               instance.title + ".</b>"
 
         Notification.objects.create(target=target, text=text, date=date,
                                     link=url, seen=False)
+
     #if bool has been finished (task was completed) was checked
     #send that information to the task creator
     elif instance.is_finished:
         target = instance.creator
 
         text = instance.target.username + " has finished his task: <b>" + \
-               instance.title + "<\\b>"
+               instance.title + ".</b>"
 
         Notification.objects.create(target=target, text=text, date=date,
                                     link=url, seen=False)
+
+        # Mail
+        mail_text = "Hi " + target.username + "!\n" + text + \
+                    "\nTo check it - click the link.\n\n" + url
+
+        Mail.objects.create(target=target, title=text,
+                            text=mail_text, sent=False)
+
     #if task was updated in any other way inform both creator and target
     else:
         target_1 = instance.creator
