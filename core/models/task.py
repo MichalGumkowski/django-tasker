@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from core.models.team import Team
 import django.dispatch
 
 # Create your models here.
@@ -21,6 +22,8 @@ PRIORITY_CHOICES = (
 class Task(models.Model):
 
     creator = models.ForeignKey('auth.User', related_name='created_tasks', on_delete=models.CASCADE)
+
+    team = models.ForeignKey(Team)
 
     target = models.ForeignKey(User, related_name='assigned_tasks', on_delete=models.CASCADE)
 

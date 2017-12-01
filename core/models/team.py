@@ -13,5 +13,9 @@ class Team(models.Model):
     description = models.TextField()
 
     members = models.ManyToManyField(
-        User
+        User,
+        related_name='team',
     )
+
+    def __str__(self):
+        return self.name

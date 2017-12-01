@@ -40,4 +40,5 @@ class Notification(models.Model):
 
         super(Notification, self).save(*args, **kwargs)
 
-        # Mail
+    def __str__(self):
+        return self.text

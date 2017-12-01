@@ -25,8 +25,24 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ('creator', 'target', 'title', 'description', 'created',
+        fields = ('creator', 'team', 'target', 'title', 'description', 'created',
                   'deadline', 'priority', 'progress', 'is_finished', 'comments')
+
+    def create(self, validated_data):
+        creator = self.context['request'].user
+        possible_teams = creator.team.all()
+        selected_team = validated_data.get('team')
+        if selected_team in possible_teams:
+            target = validated_data.get('target')
+            if target in selected_team.members.all():
+                return super(TaskSerializer, self).create(validated_data)
+            else:
+                raise ValueError('The person you assigned your task '
+                                 'to is not in selected team!')
+
+        else:
+            raise ValueError('You cannot add a task to a team you '
+                             'do not belong to')
 
     def update(self, instance, validated_data):
         if self.context['request'].user == self.target:
