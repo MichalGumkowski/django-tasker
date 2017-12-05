@@ -11,8 +11,6 @@ from django.contrib.sites.models import Site
 import datetime
 
 
-
-
 #create proper notification, when task has been added/modified
 @receiver(post_save, sender=Task)
 def task_created(sender, instance, created, **kwargs):
@@ -132,6 +130,3 @@ def team_changed(instance, old_members, **kwargs):
 
             Notification.objects.create(target=member, text=text, date=date,
                                         link=link, seen=False)
-
-
-

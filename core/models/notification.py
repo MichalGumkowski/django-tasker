@@ -1,6 +1,6 @@
+from core.models.mail import Mail
 from django.db import models
 from django.contrib.auth.models import User
-from core.models.mail import Mail
 
 
 class Notification(models.Model):

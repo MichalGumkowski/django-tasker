@@ -14,7 +14,7 @@ class Team(models.Model):
 
     members = models.ManyToManyField(
         User,
-        related_name='team',
+        related_name='teams',
     )
 
     def __str__(self):
