@@ -90,7 +90,6 @@ class TaskViewSet(viewsets.ModelViewSet):
             raise PermissionDenied({"detail":
                                         "Authentication credentials were not provided."})
 
-
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -139,7 +138,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(creator=self.request.user)
 
 
-# @permission_classes((IsInTeamToView, )) -- zmienić!
+#dorobić permission
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
@@ -161,7 +160,8 @@ class TeamViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     # dorobić permissions
-    @detail_route(methods=['get'], url_path='tasks/(?P<number>[0-9]+)')
+    @detail_route(methods=['get'], url_path='tasks/(?P<number>[0-9]+)',
+                  permission_classes=(IsInTeamToViewTasksOrMembers,))
     def task_detail(self, request, pk, number):
         task = Task.objects.filter(id=number)[0]
         serializer = TaskSerializer(task,
@@ -169,14 +169,18 @@ class TeamViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     # dorobić permissions
-    @detail_route(methods=['get'], url_path='tasks/(?P<number>[0-9]+)/comments')
+    @detail_route(methods=['get'], url_path='tasks/(?P<number>[0-9]+)/comments',
+                  permission_classes=(IsInTeamToViewTasksOrMembers,))
     def task_comments(self, request, pk, number):
-        task = Task.objects.filter(id=number)[0]
-        comments = task.comments.all()
-        serializer = CommentSerializer(comments,
-                                       many=True,
-                                       context={'request': request})
-        return Response(serializer.data)
+        try:
+            task = Task.objects.filter(id=number)[0]
+            comments = task.comments.all()
+            serializer = CommentSerializer(comments,
+                                           many=True,
+                                           context={'request': request})
+            return Response(serializer.data)
+        except IndexError:
+            raise Http404
 
 
 @permission_classes((IsAdminUser,))

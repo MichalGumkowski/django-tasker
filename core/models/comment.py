@@ -22,7 +22,7 @@ class Comment(models.Model):
     text = models.TextField(default="")
 
     comment_added = django.dispatch.Signal(providing_args=['creator', 'task',
-                                                           'date', 'pk'])
+                                                           'date', 'pk', 'task'])
 
     def __str__(self):
         return self.creator.username + '\'s comment to ' + \
@@ -31,4 +31,5 @@ class Comment(models.Model):
     #send notification when comment has been added
     def send_notification(self, instance):
         comment_created.send(sender=self.__class__, creator=instance.creator,
-                             date=instance.date, pk=instance.pk)
+                             date=instance.date, pk=instance.pk,
+                             task=instance.task)

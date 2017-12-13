@@ -69,7 +69,13 @@ def task_created(sender, instance, created, **kwargs):
 @receiver(post_save, sender=Comment)
 def comment_created(sender, instance, **kwargs):
 
-    target = ""
+    comments = instance.task.comments.all()
+    receivers = {instance.task.target, instance.task.creator}
+    for com in comments:
+        receivers |= {com.creator}
+
+    receivers.remove(instance.creator)
+
     date = instance.date
     text = instance.creator.username + " just added a comment to the task: " + \
     instance.task.title
@@ -80,13 +86,9 @@ def comment_created(sender, instance, **kwargs):
     path = obj.get_absolute_url()
     url = 'http://{domain}{path}'.format(domain=domain, path=path)
 
-    if instance.task.creator == instance.creator:
-        target = instance.task.target
-    else:
-        target = instance.task.creator
-
-    Notification.objects.create(target=target, text=text, date=date,
-                                link=url, seen=False)
+    for target in receivers:
+        Notification.objects.create(target=target, text=text, date=date,
+                                    link=url, seen=False)
 
 
 #if someone has been added/removed from the team, inform all the parties from the team
