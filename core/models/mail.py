@@ -3,7 +3,6 @@ from django.core.mail import send_mail
 from django.db import models
 
 
-
 class Mail(models.Model):
     target = models.ForeignKey(User)
 

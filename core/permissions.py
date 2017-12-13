@@ -1,27 +1,41 @@
 from rest_framework import permissions
 
 
-class IsCreatorOrReadOnly(permissions.BasePermission):
+class UserIsTasksTarget(permissions.BasePermission):
 
+    def has_permission(self, request, view):
+        obj = view.get_object()
+        return request.user == obj
+
+
+class IsInTeamToViewTasksOrMembers(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        obj = view.get_object()
+        members = obj.members.all()
+        if request.user in members:
+            return True
+
+
+class IsInTeamToViewTaskComments(permissions.BasePermission):
+    def has_permission(self, request, view):
+        task = view.get_object()
+        team = task.team
+        members = team.members.all()
+        return request.user in members
+
+
+class TaskViewSetPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
+        team = obj.team
+        members = team.members.all()
+        return request.user in members
 
-        return obj.creator == request.user
 
-
-class IsTargetOrReadOnly(permissions.BasePermission):
+class NotificationViewSetPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
+        target = obj.target
+        return request.user == target
 
-        return obj.target == request.user
-
-class IsInTeamToView(permissions.BasePermission):
-
-    def has_view_permission(self, request, view, obj):
-        users = obj.members.all()
-        if request.user in users:
-            return True
 
 

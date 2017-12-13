@@ -15,3 +15,4 @@ router.register(r'mails', views.MailViewSet)
 urlpatterns = [
     url(r'^', include(router.urls))
 ]
+
