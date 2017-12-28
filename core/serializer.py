@@ -24,7 +24,6 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only_fields = ('creator', )
 
 
-
 class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -67,6 +66,8 @@ class TeamSerializer(serializers.ModelSerializer):
 
     # send notification with previous and actual users in the group
     def update(self, instance, validated_data):
+        #print(instance.members.all())
+        #print(validated_data['members'])
         old_members = []
         for member in instance.members.all():
             old_members.append(member)

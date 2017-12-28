@@ -33,9 +33,11 @@ class TaskViewSetPermission(permissions.BasePermission):
 
 
 class NotificationViewSetPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.user.pk:
+            return True
+
     def has_object_permission(self, request, view, obj):
         target = obj.target
         return request.user == target
-
-
 

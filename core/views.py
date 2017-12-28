@@ -137,6 +137,16 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.pk:
+            queryset = user.comments.all()
+            return queryset
+        else:
+            PermissionDenied({"detail":
+                                  "Authentication credentials were not provided."})
+
+
 
 #dorobić permission
 class TeamViewSet(viewsets.ModelViewSet):
@@ -159,16 +169,17 @@ class TeamViewSet(viewsets.ModelViewSet):
                                     context={'request': Request(request)})
         return Response(serializer.data)
 
-    # dorobić permissions
     @detail_route(methods=['get'], url_path='tasks/(?P<number>[0-9]+)',
                   permission_classes=(IsInTeamToViewTasksOrMembers,))
     def task_detail(self, request, pk, number):
-        task = Task.objects.filter(id=number)[0]
-        serializer = TaskSerializer(task,
-                                    context={'request': request})
-        return Response(serializer.data)
+        try:
+            task = Task.objects.filter(id=number)[0]
+            serializer = TaskSerializer(task,
+                                        context={'request': request})
+            return Response(serializer.data)
+        except IndexError:
+            raise Http404
 
-    # dorobić permissions
     @detail_route(methods=['get'], url_path='tasks/(?P<number>[0-9]+)/comments',
                   permission_classes=(IsInTeamToViewTasksOrMembers,))
     def task_comments(self, request, pk, number):

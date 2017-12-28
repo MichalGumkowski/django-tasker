@@ -117,6 +117,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    'TEST_REQUEST_RENDERER_CLASSES': (
+        'rest_framework.renderers.MultiPartRenderer',
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.TemplateHTMLRenderer'
+    )
 }
 
 # Configure the JWTs to expire after 1 hour, and allow users to refresh near-expiration tokens
@@ -159,6 +165,6 @@ EMAIL_PORT = 587
 
 EMAIL_HOST_USER = 'testingdjango111'
 
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST_PASSWORD = 'testing12345'
 
 

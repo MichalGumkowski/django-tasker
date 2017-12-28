@@ -129,6 +129,5 @@ def team_changed(instance, old_members, **kwargs):
                 text = "<b>" + added + "</b>" + text_added
             else:
                 text = self_added
-
             Notification.objects.create(target=member, text=text, date=date,
                                         link=link, seen=False)

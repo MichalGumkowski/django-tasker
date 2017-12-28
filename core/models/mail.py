@@ -4,7 +4,10 @@ from django.db import models
 
 
 class Mail(models.Model):
-    target = models.ForeignKey(User)
+    target = models.ForeignKey(
+        User,
+        related_name='mails',
+    )
 
     title = models.CharField(
         max_length=250,
