@@ -14,7 +14,7 @@ djangorestframework==3.7.3
 djangorestframework-jwt==1.11.0
 google-api-python-client==1.6.4
 httpie==0.9.9
-httplib2==0.10.3
+httplib2==0.18.0
 idna==2.6
 itypes==1.1.0
 Jinja2==2.10
